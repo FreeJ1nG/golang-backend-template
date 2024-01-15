@@ -12,14 +12,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type util struct {
+type utils struct {
 }
 
-func NewUtil() *util {
-	return &util{}
+func NewUtil() *utils {
+	return &utils{}
 }
 
-func (u *util) GenerateToken(user models.User) (signedToken string, err error) {
+func (u *utils) GenerateToken(user models.User) (signedToken string, err error) {
 	now := time.Now()
 	expiryInHours := viper.GetInt("JWT_EXPIRY_IN_HOURS")
 	token := jwt.NewWithClaims(
@@ -35,7 +35,7 @@ func (u *util) GenerateToken(user models.User) (signedToken string, err error) {
 	return
 }
 
-func (u *util) HashPassword(password string) (passwordHash string, err error) {
+func (u *utils) HashPassword(password string) (passwordHash string, err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return
@@ -44,7 +44,7 @@ func (u *util) HashPassword(password string) (passwordHash string, err error) {
 	return
 }
 
-func (u *util) ExtractJwtToken(r *http.Request) (jwtToken string, err error) {
+func (u *utils) ExtractJwtToken(r *http.Request) (jwtToken string, err error) {
 	authorization := r.Header.Get("Authorization")
 	authSplit := strings.Split(authorization, " ")
 	if len(authSplit) != 2 {
@@ -61,7 +61,7 @@ func (u *util) ExtractJwtToken(r *http.Request) (jwtToken string, err error) {
 	return
 }
 
-func (u *util) ToJwtToken(tokenString string) (token *jwt.Token, err error) {
+func (u *utils) ToJwtToken(tokenString string) (token *jwt.Token, err error) {
 	token, err = jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %s", t.Method)
