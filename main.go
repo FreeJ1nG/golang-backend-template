@@ -14,6 +14,7 @@ func main() {
 		log.Fatalf("Failed to load config file: %s", err.Error())
 		return
 	}
+
 	mainDB := db.CreatePool(config.DBDsn)
 	db.TestConnection(mainDB)
 	defer func() {
@@ -21,7 +22,6 @@ func main() {
 	}()
 
 	s := app.NewServer(config, mainDB)
-
 	s.InjectDependencies()
 	s.ListenAndServe()
 }
