@@ -24,4 +24,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /cpduel-backend
 EXPOSE 9090
 
 # Run, change the app name to your actual app name
-CMD ["/backend-app-name"]
+CMD ["/backend-template"]
+
+# This Dockerfile is only used for CI/CD
