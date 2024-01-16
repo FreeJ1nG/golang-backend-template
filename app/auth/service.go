@@ -46,7 +46,7 @@ func (s *service) SignInUser(username string, password string) (res dto.SignInRe
 	return
 }
 
-func (s *service) SignUpUser(username string, fullName string, password string) (res dto.SignUpResponse, status int, err error) {
+func (s *service) SignUpUser(username string, firstName string, lastName string, password string) (res dto.SignUpResponse, status int, err error) {
 	status = http.StatusOK
 	_, err = s.authRepo.GetUserByUsername(username)
 	if err == nil {
@@ -60,7 +60,7 @@ func (s *service) SignUpUser(username string, fullName string, password string) 
 		err = fmt.Errorf("unable to hash password: %s", err.Error())
 		return
 	}
-	user, err := s.authRepo.CreateUser(username, fullName, passwordHash)
+	user, err := s.authRepo.CreateUser(username, firstName, lastName, passwordHash)
 	if err != nil {
 		status = http.StatusInternalServerError
 		err = fmt.Errorf("unable to create user: %s", err.Error())

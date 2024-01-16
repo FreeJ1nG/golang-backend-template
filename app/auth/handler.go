@@ -33,7 +33,7 @@ func (h *handler) SignInUser(w http.ResponseWriter, r *http.Request) {
 func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	body := util.ParseRequestBody[dto.SignUpRequest](w, r)
-	res, status, err := h.authService.SignUpUser(body.Username, body.FullName, body.Password)
+	res, status, err := h.authService.SignUpUser(body.Username, body.FirstName, body.LastName, body.Password)
 	if err != nil {
 		http.Error(w, err.Error(), status)
 		return
@@ -47,8 +47,10 @@ func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	util.EncodeResponse(
 		w,
 		dto.GetCurrentUserResponse{
-			Username: user.Username,
-			FullName: user.FullName,
+			Id:        user.Id,
+			Username:  user.Username,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
 		},
 		http.StatusOK,
 	)

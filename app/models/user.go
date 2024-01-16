@@ -3,8 +3,10 @@ package models
 import "golang.org/x/crypto/bcrypt"
 
 type User struct {
+	Id           int    `json:"id"`
 	Username     string `json:"username"`
-	FullName     string `json:"fullName"`
+	FirstName    string `json:"firstName"`
+	LastName     string `json:"lastName"`
 	PasswordHash string `json:"passwordHash"`
 }
 

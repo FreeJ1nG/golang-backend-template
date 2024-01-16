@@ -17,7 +17,7 @@ type Config struct {
 	DBName string `mapstructure:"DB_NAME"`
 	DBPort string `mapstructure:"DB_PORT"`
 
-	DBUrl string `mapstructure:"DB_URL"`
+	DBUrl string
 	DBDsn string
 }
 
@@ -39,6 +39,17 @@ func (c *Config) setDBConfig() {
 		ssl,
 	)
 
+	DBUrl := fmt.Sprintf(
+		"postgresql://%s:%s@%s:%s/%s?%s",
+		c.DBUser,
+		c.DBUserPassword,
+		c.DBHost,
+		c.DBPort,
+		c.DBName,
+		ssl,
+	)
+
+	c.DBUrl = DBUrl
 	c.DBDsn = DBDsn
 }
 

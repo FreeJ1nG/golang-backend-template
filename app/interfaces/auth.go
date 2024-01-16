@@ -9,17 +9,20 @@ import (
 )
 
 type AuthRespository interface {
-	CreateUser(username string, fullName string, passwordHash string) (user models.User, err error)
+	CreateUser(username string, firstName string, lastName string, passwordHash string) (user models.User, err error)
 	GetUserByUsername(username string) (user models.User, err error)
 }
 
 type AuthService interface {
 	SignInUser(username string, password string) (res dto.SignInResponse, status int, err error)
-	SignUpUser(username string, fullName string, password string) (res dto.SignUpResponse, status int, err error)
+	SignUpUser(username string, firstName string, lastName string, password string) (res dto.SignUpResponse, status int, err error)
 	GetUserByUsername(username string) (user models.User, status int, err error)
 }
 
 type AuthHandler interface {
+	SignInUser(w http.ResponseWriter, r *http.Request)
+	SignUpUser(w http.ResponseWriter, r *http.Request)
+	GetCurrentUser(w http.ResponseWriter, r *http.Request)
 }
 
 type AuthUtil interface {

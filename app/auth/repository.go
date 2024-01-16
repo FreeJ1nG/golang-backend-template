@@ -19,13 +19,14 @@ func NewRepository(mainDB *pgxpool.Pool) *repository {
 	}
 }
 
-func (r *repository) CreateUser(username string, fullName string, passwordHash string) (user models.User, err error) {
+func (r *repository) CreateUser(username string, firstName string, lastName string, passwordHash string) (user models.User, err error) {
 	ctx := context.Background()
 	_, err = r.mainDB.Exec(
 		ctx,
-		`INSERT INTO Account (username, fullName, passwordHash) VALUES ($1, $2, $3);`,
+		`INSERT INTO Account (username, first_name, last_name, password_hash) VALUES ($1, $2, $3, $4);`,
 		username,
-		fullName,
+		firstName,
+		lastName,
 		passwordHash,
 	)
 	if err != nil {
@@ -33,7 +34,8 @@ func (r *repository) CreateUser(username string, fullName string, passwordHash s
 	}
 	user = models.User{
 		Username:     username,
-		FullName:     fullName,
+		FirstName:    firstName,
+		LastName:     lastName,
 		PasswordHash: passwordHash,
 	}
 	return
