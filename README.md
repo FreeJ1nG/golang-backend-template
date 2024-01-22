@@ -67,4 +67,27 @@ db/migrations/000001_create_user_table.up.sql
 
 The up migration file specifies how the database should handle an update/change in the database, and the down migration file specifies how to undo said changes.
 
-This project contains 1 initial migration, which is the `create_user_table` migration
+This project contains 1 initial migration, which is the `create_user_table` migration, this migration creates the initial user table with `id`, `username`, `firstName`, `lastName` and `password_hash` fields.
+
+To apply unapplied migration(s), do
+
+```
+make migrate
+```
+
+To undo migration(s), do
+
+```
+make migrate-down
+```
+
+## Handler, Service, Repository, Util files
+
+- Handler files are essentially controllers, these handlers will handle incoming requests to certain urls (each request object can be accessed through `r *http.Request`)
+- Service files handle the bussiness logic part of the application
+- Repository files handle any sort of database mutation, typically used by service files
+- Util files handle any sort of additional logic that makes use of repository or service files
+
+## Route Protector Wrapper
+
+To protect certain routes to only signed in users (requests in which the Authorization header is filled with a Bearer token), use the `routeProtector.Wrapper` as can be seen in the `app/injections.go` file.

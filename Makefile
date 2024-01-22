@@ -27,6 +27,3 @@ migrate:
 
 migrate-down:
 	go run db/migrations/migrate.go -action down $(filter-out $@,$(MAKECMDGOALS))
-
-run-script:
-	go run scripts/runner/script_runner.go
