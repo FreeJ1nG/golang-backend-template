@@ -28,23 +28,28 @@ func (rp *routeProtector) Wrapper(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := rp.authUtil.ExtractJwtToken(r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			EncodeErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		token, err := rp.authUtil.ToJwtToken(tokenString)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			EncodeErrorResponse(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			http.Error(w, "unable to get token claims", http.StatusInternalServerError)
+			EncodeErrorResponse(w, "unable to get token claims", http.StatusInternalServerError)
+			return
+		}
+		tokenType := claims["typ"].(string)
+		if tokenType != "access" {
+			EncodeErrorResponse(w, "invalid token type, must be access token", http.StatusForbidden)
 			return
 		}
 		username := claims["sub"].(string)
 		user, status, err := rp.authService.GetUserByUsername(username)
 		if err != nil {
-			http.Error(w, err.Error(), status)
+			EncodeErrorResponse(w, err.Error(), status)
 			return
 		}
 		ctx := context.WithValue(r.Context(), UserContextKey, user)

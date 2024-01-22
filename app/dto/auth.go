@@ -6,7 +6,8 @@ type SignInRequest struct {
 }
 
 type SignInResponse struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh"`
 }
 
 type SignUpRequest struct {
@@ -17,7 +18,8 @@ type SignUpRequest struct {
 }
 
 type SignUpResponse struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh"`
 }
 
 type GetCurrentUserResponse struct {

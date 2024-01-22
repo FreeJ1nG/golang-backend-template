@@ -19,19 +19,39 @@ func NewUtil() *utils {
 	return &utils{}
 }
 
-func (u *utils) GenerateToken(user models.User) (signedToken string, err error) {
+func (u *utils) GenerateTokenPair(user models.User) (signedJwtToken string, signedRefreshToken string, err error) {
 	now := time.Now()
-	expiryInHours := viper.GetInt("JWT_EXPIRY_IN_HOURS")
+	jwtExpiryInDays := viper.GetInt("JWT_EXPIRY_IN_DAYS")
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		jwt.RegisteredClaims{
-			Issuer:    viper.GetString("APP_NAME"),
-			IssuedAt:  jwt.NewNumericDate(now),
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(expiryInHours) * time.Hour)),
-			Subject:   user.Username,
+		models.JwtClaims{
+			TokenType: "access",
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    viper.GetString("APP_NAME"),
+				IssuedAt:  jwt.NewNumericDate(now),
+				ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(jwtExpiryInDays) * 24 * time.Hour)),
+				Subject:   user.Username,
+			},
 		},
 	)
-	signedToken, err = token.SignedString([]byte(viper.GetString("JWT_SECRET_KEY")))
+	signedJwtToken, err = token.SignedString([]byte(viper.GetString("JWT_SECRET_KEY")))
+	if err != nil {
+		return
+	}
+	refreshExpiryInDays := viper.GetInt("REFRESH_JWT_EXPIRY_IN_DAYS")
+	refreshToken := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		models.JwtClaims{
+			TokenType: "refresh",
+			RegisteredClaims: jwt.RegisteredClaims{
+				Issuer:    viper.GetString("APP_NAME"),
+				IssuedAt:  jwt.NewNumericDate(now),
+				ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(refreshExpiryInDays) * 24 * time.Hour)),
+				Subject:   user.Username,
+			},
+		},
+	)
+	signedRefreshToken, err = refreshToken.SignedString([]byte(viper.GetString("JWT_SECRET_KEY")))
 	return
 }
 

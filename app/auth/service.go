@@ -34,14 +34,15 @@ func (s *service) SignInUser(username string, password string) (res dto.SignInRe
 		status = http.StatusUnauthorized
 		return
 	}
-	signedToken, err := s.authUtil.GenerateToken(user)
+	jwtToken, refreshToken, err := s.authUtil.GenerateTokenPair(user)
 	if err != nil {
 		err = fmt.Errorf("unable to generate token: %s", err.Error())
 		status = http.StatusInternalServerError
 		return
 	}
 	res = dto.SignInResponse{
-		Token: signedToken,
+		Token:        jwtToken,
+		RefreshToken: refreshToken,
 	}
 	return
 }
@@ -66,14 +67,15 @@ func (s *service) SignUpUser(username string, firstName string, lastName string,
 		err = fmt.Errorf("unable to create user: %s", err.Error())
 		return
 	}
-	jwtToken, err := s.authUtil.GenerateToken(user)
+	jwtToken, refreshToken, err := s.authUtil.GenerateTokenPair(user)
 	if err != nil {
 		status = http.StatusInternalServerError
 		err = fmt.Errorf("unable to generate token: %s", err.Error())
 		return
 	}
 	res = dto.SignUpResponse{
-		Token: jwtToken,
+		Token:        jwtToken,
+		RefreshToken: refreshToken,
 	}
 	return
 }

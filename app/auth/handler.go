@@ -24,10 +24,10 @@ func (h *handler) SignInUser(w http.ResponseWriter, r *http.Request) {
 	body := util.ParseRequestBody[dto.SignInRequest](w, r)
 	res, status, err := h.authService.SignInUser(body.Username, body.Password)
 	if err != nil {
-		http.Error(w, err.Error(), status)
+		util.EncodeErrorResponse(w, err.Error(), status)
 		return
 	}
-	util.EncodeResponse(w, res, status)
+	util.EncodeSuccessResponse(w, res, status)
 }
 
 func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
@@ -35,16 +35,21 @@ func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
 	body := util.ParseRequestBody[dto.SignUpRequest](w, r)
 	res, status, err := h.authService.SignUpUser(body.Username, body.FirstName, body.LastName, body.Password)
 	if err != nil {
-		http.Error(w, err.Error(), status)
+		util.EncodeErrorResponse(w, err.Error(), status)
 		return
 	}
-	util.EncodeResponse(w, res, status)
+	util.EncodeSuccessResponse(w, res, status)
+}
+
+func (h *handler) RefreshJwt(w http.ResponseWriter, r *http.Request) {
+	// TODO: Finish this
+	w.Header().Set("Content-Type", "application/json")
 }
 
 func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	user := r.Context().Value(util.UserContextKey).(models.User)
-	util.EncodeResponse(
+	util.EncodeSuccessResponse(
 		w,
 		dto.GetCurrentUserResponse{
 			Id:        user.Id,

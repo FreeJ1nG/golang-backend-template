@@ -26,7 +26,7 @@ type AuthHandler interface {
 }
 
 type AuthUtil interface {
-	GenerateToken(user models.User) (signedToken string, err error)
+	GenerateTokenPair(user models.User) (signedJwtToken string, signedRefreshToken string, err error)
 	HashPassword(password string) (passwordHash string, err error)
 	ExtractJwtToken(r *http.Request) (jwtToken string, err error)
 	ToJwtToken(tokenString string) (token *jwt.Token, err error)
