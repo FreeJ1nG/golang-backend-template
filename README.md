@@ -46,6 +46,23 @@ or
 air
 ```
 
+## Interfaces
+
+Golang does not allow import cycles, to counter that we define interfaces for each **Handler, Service, Repository and Util** in`app/interfaces`. See `app/interfaces/auth.go` for some example, any other reference to another module's instance will use this `interfaces.SomeInstance` interface type
+
+For example, if a module called `problem` uses any sort of authentication, say `AuthService`, we will define the `authService` typing as `interfaces.AuthService` so that the problem module does not have any dependency to the auth module
+
+## DTO (Data Transfer Object)
+
+Any definition of request types and response types will be defined on `app/dto/auth.go`
+
+## Utility
+
+- `config.go` extracts the `.env` file and initialized a `Config` object with the datas extracted from the environment file
+- `logger.go` this middleware logs any request that goes in the server
+- `parser.go` this utility file handles any sort of request parsing and response encoding
+- `route-protector.go` creates a wrapper for any route that will be protected, ensuring that any handler function that is wrapped has a user context passed along with the request object
+
 ## Migrations
 
 A migration is a series of changes to a database (be it of the table, of the schema, or anything related to the database)
