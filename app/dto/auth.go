@@ -28,3 +28,12 @@ type GetCurrentUserResponse struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh"`
+}
+
+type RefreshTokenResponse struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh"`
+}

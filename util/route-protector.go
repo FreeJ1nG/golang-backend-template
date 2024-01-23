@@ -47,12 +47,7 @@ func (rp *routeProtector) Wrapper(f http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		username := claims["sub"].(string)
-		user, status, err := rp.authService.GetUserByUsername(username)
-		if err != nil {
-			EncodeErrorResponse(w, err.Error(), status)
-			return
-		}
-		ctx := context.WithValue(r.Context(), UserContextKey, user)
+		ctx := context.WithValue(r.Context(), UserContextKey, username)
 		f(w, r.WithContext(ctx))
 	}
 }

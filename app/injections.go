@@ -35,5 +35,6 @@ func (s *Server) InjectDependencies() {
 	authRouter := s.router.PathPrefix("/auth").Subrouter()
 	authRouter.HandleFunc("/sign-in", authHandler.SignInUser)
 	authRouter.HandleFunc("/sign-up", authHandler.SignUpUser)
+	authRouter.HandleFunc("/refresh-jwt", authHandler.RefreshJwt)
 	authRouter.HandleFunc("/me", routeProtector.Wrapper(authHandler.GetCurrentUser))
 }

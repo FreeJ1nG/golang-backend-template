@@ -7,6 +7,7 @@ import (
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
 	"github.com/FreeJ1nG/backend-template/app/models"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type service struct {
@@ -88,5 +89,36 @@ func (s *service) GetUserByUsername(username string) (user models.User, status i
 		status = http.StatusNotFound
 		return
 	}
+	return
+}
+
+func (s *service) RefreshToken(refreshToken string) (res dto.RefreshTokenResponse, status int, err error) {
+	status = http.StatusOK
+	rt, err := s.authUtil.ToJwtToken(refreshToken)
+	if err != nil {
+		err = fmt.Errorf("unable to decode refresh token: %s", err.Error())
+		status = http.StatusBadRequest
+		return
+	}
+	tokenClaims, ok := rt.Claims.(jwt.MapClaims)
+	if !ok {
+		err = fmt.Errorf("unable to get token claims: %s", err.Error())
+		status = http.StatusBadRequest
+		return
+	}
+	user, err := s.authRepo.GetUserByUsername(tokenClaims["sub"].(string))
+	if err != nil {
+		err = fmt.Errorf("unable to get user: %s", err.Error())
+		status = http.StatusNotFound
+		return
+	}
+	jwtToken, refreshToken, err := s.authUtil.GenerateTokenPair(user)
+	if err != nil {
+		err = fmt.Errorf("unable to generate new token: %s", err.Error())
+		status = http.StatusInternalServerError
+		return
+	}
+	res.Token = jwtToken
+	res.RefreshToken = refreshToken
 	return
 }

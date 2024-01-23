@@ -5,7 +5,6 @@ import (
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
-	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/FreeJ1nG/backend-template/util"
 )
 
@@ -41,14 +40,14 @@ func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
 	util.EncodeSuccessResponse(w, res, status)
 }
 
-func (h *handler) RefreshJwt(w http.ResponseWriter, r *http.Request) {
-	// TODO: Finish this
-	w.Header().Set("Content-Type", "application/json")
-}
-
 func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	user := r.Context().Value(util.UserContextKey).(models.User)
+	username := r.Context().Value(util.UserContextKey).(string)
+	user, status, err := h.authService.GetUserByUsername(username)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
 	util.EncodeSuccessResponse(
 		w,
 		dto.GetCurrentUserResponse{
@@ -59,4 +58,15 @@ func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 		},
 		http.StatusOK,
 	)
+}
+
+func (h *handler) RefreshJwt(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	body := util.ParseRequestBody[dto.RefreshTokenRequest](w, r)
+	res, status, err := h.authService.RefreshToken(body.RefreshToken)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
+	util.EncodeSuccessResponse(w, res, status)
 }
