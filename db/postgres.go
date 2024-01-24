@@ -21,7 +21,7 @@ func TestConnection(pool *pgxpool.Pool) {
 	ctx := context.Background()
 	_, err := pool.Acquire(ctx)
 	if err != nil {
-		log.Fatal("Failed to connect to database ", err.Error())
+		log.Fatalf("failed to connect to postgres database: %s", err.Error())
 	}
-	fmt.Println("Connected to database ")
+	fmt.Println("Connected to Postgres Database")
 }

@@ -21,7 +21,13 @@ func main() {
 		mainDB.Close()
 	}()
 
-	s := app.NewServer(config, mainDB)
+	rdb := db.CreateRdb(config)
+	db.TestRdbConnection(rdb)
+	defer func() {
+		rdb.Close()
+	}()
+
+	s := app.NewServer(config, mainDB, rdb)
 	s.InjectDependencies()
 	s.ListenAndServe()
 }

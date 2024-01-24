@@ -7,6 +7,7 @@ import (
 	"github.com/FreeJ1nG/backend-template/util"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
 )
 
@@ -14,10 +15,11 @@ type Server struct {
 	config     util.Config
 	router     *mux.Router
 	db         *pgxpool.Pool
+	rdb        *redis.Client
 	httpServer *http.Server
 }
 
-func NewServer(config util.Config, db *pgxpool.Pool) *Server {
+func NewServer(config util.Config, db *pgxpool.Pool, rdb *redis.Client) *Server {
 	r := mux.NewRouter().PathPrefix("/v1").Subrouter()
 	server := &http.Server{
 		Addr:    ":" + config.ServerPort,
@@ -27,6 +29,7 @@ func NewServer(config util.Config, db *pgxpool.Pool) *Server {
 		config:     config,
 		router:     r,
 		db:         db,
+		rdb:        rdb,
 		httpServer: server,
 	}
 }

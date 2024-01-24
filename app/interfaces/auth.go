@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/models"
@@ -11,6 +12,8 @@ import (
 type AuthRespository interface {
 	CreateUser(username string, firstName string, lastName string, passwordHash string) (user models.User, err error)
 	GetUserByUsername(username string) (user models.User, err error)
+	SetTokenBlacklistForUser(username string, tokenToBeInvalidated string, timeUntilExpiration time.Duration)
+	GetBlacklistedTokenForUser(username string) (res *string, err error)
 }
 
 type AuthService interface {
@@ -18,6 +21,7 @@ type AuthService interface {
 	SignUpUser(username string, firstName string, lastName string, password string) (res dto.SignUpResponse, status int, err error)
 	GetUserByUsername(username string) (user models.User, status int, err error)
 	RefreshToken(refreshToken string) (res dto.RefreshTokenResponse, status int, err error)
+	InvalidateToken(userTokenClaims models.JwtClaims, tokenToBeInvalidated string) (status int, err error)
 }
 
 type AuthHandler interface {
@@ -25,6 +29,7 @@ type AuthHandler interface {
 	SignUpUser(w http.ResponseWriter, r *http.Request)
 	GetCurrentUser(w http.ResponseWriter, r *http.Request)
 	RefreshJwt(w http.ResponseWriter, r *http.Request)
+	InvalidateToken(w http.ResponseWriter, r *http.Request)
 }
 
 type AuthUtil interface {

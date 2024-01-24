@@ -3,22 +3,26 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
 	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/redis/go-redis/v9"
 )
 
 type service struct {
 	authRepo interfaces.AuthRespository
 	authUtil interfaces.AuthUtil
+	rdb      *redis.Client
 }
 
-func NewService(authRepo interfaces.AuthRespository, authUtil interfaces.AuthUtil) *service {
+func NewService(authRepo interfaces.AuthRespository, authUtil interfaces.AuthUtil, rdb *redis.Client) *service {
 	return &service{
 		authRepo: authRepo,
 		authUtil: authUtil,
+		rdb:      rdb,
 	}
 }
 
@@ -120,5 +124,22 @@ func (s *service) RefreshToken(refreshToken string) (res dto.RefreshTokenRespons
 	}
 	res.Token = jwtToken
 	res.RefreshToken = refreshToken
+	return
+}
+
+func (s *service) InvalidateToken(userTokenClaims models.JwtClaims, tokenToInvalidate string) (status int, err error) {
+	status = http.StatusOK
+	if userTokenClaims.Subject == "" {
+		status = http.StatusBadRequest
+		err = fmt.Errorf("unable to get username: token subject does not exist")
+		return
+	}
+	if userTokenClaims.IssuedAt == nil {
+		status = http.StatusBadRequest
+		err = fmt.Errorf("unable to get token expiration: token iat does not exist")
+		return
+	}
+	timeUntilExpiration := time.Until(time.Unix(userTokenClaims.ExpiresAt.Unix(), 0))
+	s.authRepo.SetTokenBlacklistForUser(userTokenClaims.Subject, tokenToInvalidate, timeUntilExpiration)
 	return
 }
