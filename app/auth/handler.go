@@ -5,6 +5,7 @@ import (
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
+	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/FreeJ1nG/backend-template/util"
 )
 
@@ -19,7 +20,6 @@ func NewHandler(authService interfaces.AuthService) *handler {
 }
 
 func (h *handler) SignInUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	body := util.ParseRequestBody[dto.SignInRequest](w, r)
 	res, status, err := h.authService.SignInUser(body.Username, body.Password)
 	if err != nil {
@@ -30,7 +30,6 @@ func (h *handler) SignInUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	body := util.ParseRequestBody[dto.SignUpRequest](w, r)
 	res, status, err := h.authService.SignUpUser(body.Username, body.FirstName, body.LastName, body.Password)
 	if err != nil {
@@ -41,9 +40,8 @@ func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	username := r.Context().Value(util.UserContextKey).(string)
-	user, status, err := h.authService.GetUserByUsername(username)
+	tokenClaims := r.Context().Value(util.TokenClaimsContextKey).(models.JwtClaims)
+	user, status, err := h.authService.GetUserByUsername(tokenClaims.Subject)
 	if err != nil {
 		util.EncodeErrorResponse(w, err.Error(), status)
 		return
@@ -61,7 +59,6 @@ func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) RefreshJwt(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	body := util.ParseRequestBody[dto.RefreshTokenRequest](w, r)
 	res, status, err := h.authService.RefreshToken(body.RefreshToken)
 	if err != nil {
@@ -69,4 +66,15 @@ func (h *handler) RefreshJwt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	util.EncodeSuccessResponse(w, res, status)
+}
+
+func (h *handler) InvalidateToken(w http.ResponseWriter, r *http.Request) {
+	tokenClaims := r.Context().Value(util.TokenClaimsContextKey).(models.JwtClaims)
+	token := r.Context().Value(util.TokenContextKey).(string)
+	status, err := h.authService.InvalidateToken(tokenClaims, token)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
+	util.EncodeSuccessResponse(w, dto.SuccessNoPayloadResponse, status)
 }

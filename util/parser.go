@@ -36,3 +36,14 @@ func EncodeErrorResponse(w http.ResponseWriter, errorMessage string, status int)
 		return
 	}
 }
+
+func ConvertMapToTypeStruct[T interface{}](mp map[string]interface{}) (res T, err error) {
+	marshaledData, err := json.Marshal(mp)
+	if err != nil {
+		return
+	}
+	if err = json.Unmarshal(marshaledData, &res); err != nil {
+		return
+	}
+	return
+}

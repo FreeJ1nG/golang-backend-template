@@ -1,5 +1,9 @@
 package dto
 
+var SuccessNoPayloadResponse = map[string]bool{
+	"success": true,
+}
+
 type ErrorData struct {
 	Message string `json:"message"`
 }

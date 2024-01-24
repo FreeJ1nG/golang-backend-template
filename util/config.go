@@ -17,6 +17,10 @@ type Config struct {
 	DBName string `mapstructure:"DB_NAME"`
 	DBPort string `mapstructure:"DB_PORT"`
 
+	RedisPort     string `mapstructure:"REDIS_PORT"`
+	RedisHost     string `mapstructure:"REDIS_HOST"`
+	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
+
 	DBUrl string
 	DBDsn string
 }
