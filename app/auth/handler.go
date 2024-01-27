@@ -55,6 +55,7 @@ func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 			Username:  user.Username,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
+			Role:      string(user.Role),
 		},
 		http.StatusOK,
 	)

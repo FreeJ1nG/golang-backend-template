@@ -26,6 +26,7 @@ func (u *utils) GenerateTokenPair(user models.User) (signedJwtToken string, sign
 		jwt.SigningMethodHS256,
 		models.JwtClaims{
 			TokenType: "access",
+			Role:      string(user.Role),
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    viper.GetString("APP_NAME"),
 				IssuedAt:  jwt.NewNumericDate(now),

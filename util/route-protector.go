@@ -2,9 +2,11 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
+	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -24,7 +26,7 @@ func NewRouteProtector(authUtil interfaces.AuthUtil, authService interfaces.Auth
 	}
 }
 
-func (rp *routeProtector) Wrapper(f http.HandlerFunc) http.HandlerFunc {
+func (rp *routeProtector) Wrapper(f http.HandlerFunc, adminOnly bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := rp.authUtil.ExtractJwtToken(r)
 		if err != nil {
@@ -44,6 +46,16 @@ func (rp *routeProtector) Wrapper(f http.HandlerFunc) http.HandlerFunc {
 		tokenType := claims["typ"].(string)
 		if tokenType != "access" {
 			EncodeErrorResponse(w, "invalid token type, must be access token", http.StatusForbidden)
+			return
+		}
+		parsedRole, err := models.ParseUserRole(claims["role"].(string))
+		if err != nil {
+			EncodeErrorResponse(w, "invalid token, role does not exist in payload", http.StatusBadRequest)
+			return
+		}
+		fmt.Println(parsedRole)
+		if adminOnly && parsedRole != models.Admin {
+			EncodeErrorResponse(w, "unauthorized access to endpoint, must be admin", http.StatusUnauthorized)
 			return
 		}
 		username := claims["sub"].(string)

@@ -10,6 +10,7 @@ import (
 
 func (s *Server) InjectDependencies() {
 	s.router.Use(util.LoggerMiddleware)
+	s.router.Use(util.DefaultFormatMiddleware)
 
 	// Utils
 	authUtil := auth.NewUtil()
@@ -36,5 +37,5 @@ func (s *Server) InjectDependencies() {
 	authRouter.HandleFunc("/sign-in", authHandler.SignInUser)
 	authRouter.HandleFunc("/sign-up", authHandler.SignUpUser)
 	authRouter.HandleFunc("/refresh-jwt", authHandler.RefreshJwt)
-	authRouter.HandleFunc("/me", routeProtector.Wrapper(authHandler.GetCurrentUser))
+	authRouter.HandleFunc("/me", routeProtector.Wrapper(authHandler.GetCurrentUser, false))
 }

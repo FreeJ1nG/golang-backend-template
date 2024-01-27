@@ -9,7 +9,7 @@ import (
 )
 
 type AuthRespository interface {
-	CreateUser(username string, firstName string, lastName string, passwordHash string) (user models.User, err error)
+	CreateUser(username string, firstName string, lastName string, passwordHash string, role models.UserRole) (user models.User, err error)
 	GetUserByUsername(username string) (user models.User, err error)
 }
 

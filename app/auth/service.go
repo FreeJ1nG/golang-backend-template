@@ -62,7 +62,7 @@ func (s *service) SignUpUser(username string, firstName string, lastName string,
 		err = fmt.Errorf("unable to hash password: %s", err.Error())
 		return
 	}
-	user, err := s.authRepo.CreateUser(username, firstName, lastName, passwordHash)
+	user, err := s.authRepo.CreateUser(username, firstName, lastName, passwordHash, models.Member)
 	if err != nil {
 		status = http.StatusInternalServerError
 		err = fmt.Errorf("unable to create user: %s", err.Error())
