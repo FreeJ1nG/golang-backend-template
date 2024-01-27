@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/FreeJ1nG/backend-template/app/pagination"
+
 type ErrorData struct {
 	Message string `json:"message"`
 }
@@ -10,14 +12,16 @@ type ErrorPayload struct {
 }
 
 type Response[T interface{}] struct {
-	Data  *T            `json:"data,omitempty"`
-	Error *ErrorPayload `json:"error,omitempty"`
+	Data     *T                   `json:"data,omitempty"`
+	Error    *ErrorPayload        `json:"error,omitempty"`
+	Metadata *pagination.Metadata `json:"metadata,omitempty"`
 }
 
-func NewSuccessResponse[T interface{}](data T) (res Response[T]) {
+func NewSuccessResponse[T interface{}](data T, metadata *pagination.Metadata) (res Response[T]) {
 	return Response[T]{
-		Data:  &data,
-		Error: nil,
+		Data:     &data,
+		Error:    nil,
+		Metadata: metadata,
 	}
 }
 
@@ -30,5 +34,6 @@ func NewErrorResponse(errorMessage string, status int) (res Response[struct{}]) 
 				Message: errorMessage,
 			},
 		},
+		Metadata: nil,
 	}
 }

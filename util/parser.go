@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
+	"github.com/FreeJ1nG/backend-template/app/pagination"
 )
 
 func ParseRequestBody[T interface{}](w http.ResponseWriter, r *http.Request) (res T) {
@@ -17,9 +18,9 @@ func ParseRequestBody[T interface{}](w http.ResponseWriter, r *http.Request) (re
 	return
 }
 
-func EncodeSuccessResponse[T interface{}](w http.ResponseWriter, res T, status int) {
+func EncodeSuccessResponse[T interface{}](w http.ResponseWriter, res T, status int, metadata *pagination.Metadata) {
 	w.WriteHeader(status)
-	resp := dto.NewSuccessResponse[T](res)
+	resp := dto.NewSuccessResponse[T](res, metadata)
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("unable to create response json: %s", err.Error()), http.StatusInternalServerError)

@@ -26,7 +26,7 @@ func (h *handler) SignInUser(w http.ResponseWriter, r *http.Request) {
 		util.EncodeErrorResponse(w, err.Error(), status)
 		return
 	}
-	util.EncodeSuccessResponse(w, res, status)
+	util.EncodeSuccessResponse(w, res, status, nil)
 }
 
 func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func (h *handler) SignUpUser(w http.ResponseWriter, r *http.Request) {
 		util.EncodeErrorResponse(w, err.Error(), status)
 		return
 	}
-	util.EncodeSuccessResponse(w, res, status)
+	util.EncodeSuccessResponse(w, res, status, nil)
 }
 
 func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +58,7 @@ func (h *handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 			Role:      string(user.Role),
 		},
 		http.StatusOK,
+		nil,
 	)
 }
 
@@ -69,5 +70,5 @@ func (h *handler) RefreshJwt(w http.ResponseWriter, r *http.Request) {
 		util.EncodeErrorResponse(w, err.Error(), status)
 		return
 	}
-	util.EncodeSuccessResponse(w, res, status)
+	util.EncodeSuccessResponse(w, res, status, nil)
 }
