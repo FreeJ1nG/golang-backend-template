@@ -56,8 +56,3 @@ func (p *Paginator) GetPaginationInfo(tableName string, opts *Options) (offset i
 	metadata.TotalPages = int(math.Ceil(float64(metadata.TotalItems) / float64(opts.ItemPerPage)))
 	return
 }
-
-func (p *Paginator) Paginate(length int, opts *Options) (res Metadata) {
-	res.TotalPages = int(math.Ceil(float64(length) / float64(opts.ItemPerPage)))
-	return
-}
