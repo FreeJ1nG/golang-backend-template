@@ -69,7 +69,7 @@ func (r *repository) GetTableDataTypes(tableName string) (columns []models.Colum
 
 func (r *repository) GetTableData(tableName string, opts *pagination.Options) (res []map[string]interface{}, metadata pagination.Metadata, err error) {
 	ctx := context.Background()
-	offset, limit, metadata, err := r.paginator.GetPaginationInfo(tableName, opts)
+	offset, limit, metadata, err := r.paginator.Paginate(tableName, opts)
 	if err != nil {
 		return
 	}

@@ -46,7 +46,7 @@ func (p *Paginator) getTotalDataInstance(tableName string) (res int, err error) 
 	return
 }
 
-func (p *Paginator) GetPaginationInfo(tableName string, opts *Options) (offset int, limit int, metadata Metadata, err error) {
+func (p *Paginator) Paginate(tableName string, opts *Options) (offset int, limit int, metadata Metadata, err error) {
 	offset = opts.ItemPerPage * (opts.CurrentPage - 1)
 	limit = opts.ItemPerPage
 	metadata.TotalItems, err = p.getTotalDataInstance(tableName)
