@@ -49,4 +49,5 @@ func (s *Server) InjectDependencies() {
 	cmsRouter := s.router.PathPrefix("/cms").Subrouter()
 	cmsRouter.HandleFunc("/{tableName}/info", routeProtector.Wrapper(cmsHandler.GetTableInfo, true)).Methods("GET")
 	cmsRouter.HandleFunc("/{tableName}", routeProtector.Wrapper(cmsHandler.GetTableData, true)).Methods("GET")
+	cmsRouter.HandleFunc("/{tableName}", routeProtector.Wrapper(cmsHandler.CreateTableData, true)).Methods("POST")
 }

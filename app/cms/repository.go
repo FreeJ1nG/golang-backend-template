@@ -3,6 +3,7 @@ package cms
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/FreeJ1nG/backend-template/app/pagination"
@@ -61,23 +62,72 @@ func (r *repository) GetTableDataTypes(tableName string) (columns []models.Colum
 		AND conrelid = $1::regclass;`,
 		tableName,
 	)
-	if err != nil {
-		return
-	}
 	return
 }
 
 func (r *repository) GetTableData(tableName string, opts *pagination.Options) (res []map[string]interface{}, metadata pagination.Metadata, err error) {
 	ctx := context.Background()
+
 	offset, limit, metadata, err := r.paginator.Paginate(tableName, opts)
 	if err != nil {
 		return
 	}
+
 	err = pgxscan.Select(
 		ctx,
 		r.mainDB,
 		&res,
 		fmt.Sprintf("SELECT * FROM %s OFFSET %d LIMIT %d", tableName, offset, limit),
 	)
+
+	return
+}
+
+func (r *repository) CreateTableData(tableName string, data map[string]interface{}) (res map[string]interface{}, err error) {
+	ctx := context.Background()
+
+	var columns []string
+	var placeholders []string
+	var values []interface{}
+	i := 1
+
+	for key, value := range data {
+		columns = append(columns, key)
+		placeholders = append(placeholders, fmt.Sprintf("$%d", i))
+		values = append(values, value)
+		i++
+	}
+
+	joinedColumns := strings.Join(columns, ",")
+	joinedPlaceholders := strings.Join(placeholders, ",")
+	sql := fmt.Sprintf(
+		"INSERT INTO %s (%s) VALUES (%s) RETURNING %s;",
+		tableName,
+		joinedColumns,
+		joinedPlaceholders,
+		"id,"+joinedColumns,
+	)
+
+	row := r.mainDB.QueryRow(
+		ctx,
+		sql,
+		values...,
+	)
+
+	scanTargets := make([]interface{}, len(columns)+1)
+	for i := range scanTargets {
+		var result interface{}
+		scanTargets[i] = &result
+	}
+
+	err = row.Scan(scanTargets...)
+	if err != nil {
+		return
+	}
+
+	res = make(map[string]interface{})
+	for i, value := range scanTargets[1:] {
+		res[columns[i]] = value
+	}
 	return
 }

@@ -21,22 +21,39 @@ func NewService(cmsRepo interfaces.CmsRepository) *service {
 
 func (s *service) GetTableInfo(tableName string) (res []models.Column, status int, err error) {
 	status = http.StatusOK
+
 	res, err = s.cmsRepo.GetTableDataTypes(tableName)
 	if err != nil {
 		status = http.StatusInternalServerError
 		err = fmt.Errorf("unable to get table data type: %s", err.Error())
 		return
 	}
+
 	return
 }
 
 func (s *service) GetTableData(tableName string, opts *pagination.Options) (res []map[string]interface{}, metadata pagination.Metadata, status int, err error) {
 	status = http.StatusOK
+
 	res, metadata, err = s.cmsRepo.GetTableData(tableName, opts)
 	if err != nil {
 		status = http.StatusInternalServerError
 		err = fmt.Errorf("unable to get table data: %s", err.Error())
 		return
 	}
+
+	return
+}
+
+func (s *service) CreateTableData(tableName string, data map[string]interface{}) (res map[string]interface{}, status int, err error) {
+	status = http.StatusOK
+
+	res, err = s.cmsRepo.CreateTableData(tableName, data)
+	if err != nil {
+		status = http.StatusBadRequest
+		err = fmt.Errorf("unable to create table data: %s", err.Error())
+		return
+	}
+
 	return
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/pagination"
+	"github.com/iancoleman/strcase"
 )
 
 func ParseRequestBody[T interface{}](w http.ResponseWriter, r *http.Request) (res T) {
@@ -36,4 +37,12 @@ func EncodeErrorResponse(w http.ResponseWriter, errorMessage string, status int)
 		http.Error(w, fmt.Sprintf("unable to create error response json: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
+}
+
+func ConvertMapKeysToSnakeCase(m map[string]interface{}) (res map[string]interface{}) {
+	res = make(map[string]interface{})
+	for key, value := range m {
+		res[strcase.ToSnake(key)] = value
+	}
+	return
 }
