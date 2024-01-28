@@ -7,6 +7,7 @@ import (
 	"github.com/FreeJ1nG/backend-template/app/pagination"
 	"github.com/FreeJ1nG/backend-template/util"
 	"github.com/gorilla/mux"
+	"github.com/iancoleman/strcase"
 )
 
 type handler struct {
@@ -52,8 +53,9 @@ func (h *handler) CreateTableData(w http.ResponseWriter, r *http.Request) {
 	tableName := vars["tableName"]
 
 	body := util.ParseRequestBody[map[string]interface{}](w, r)
-	body = util.ConvertMapKeysToSnakeCase(body)
+	body = util.ConvertMapKeys(body, strcase.ToSnake)
 	res, status, err := h.cmsService.CreateTableData(tableName, body)
+	res = util.ConvertMapKeys(res, strcase.ToLowerCamel)
 
 	if err != nil {
 		util.EncodeErrorResponse(w, err.Error(), status)

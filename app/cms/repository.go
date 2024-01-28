@@ -25,6 +25,7 @@ func NewRepository(mainDB *pgxpool.Pool, paginator *pagination.Paginator) *repos
 
 func (r *repository) GetTableDataTypes(tableName string) (columns []models.Column, err error) {
 	ctx := context.Background()
+
 	err = pgxscan.Select(
 		ctx,
 		r.mainDB,
@@ -62,6 +63,7 @@ func (r *repository) GetTableDataTypes(tableName string) (columns []models.Colum
 		AND conrelid = $1::regclass;`,
 		tableName,
 	)
+
 	return
 }
 
@@ -125,9 +127,13 @@ func (r *repository) CreateTableData(tableName string, data map[string]interface
 		return
 	}
 
+	fmt.Println(scanTargets...)
+
 	res = make(map[string]interface{})
+	res["id"] = scanTargets[0]
 	for i, value := range scanTargets[1:] {
 		res[columns[i]] = value
 	}
+
 	return
 }
