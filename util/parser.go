@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/pagination"
@@ -36,6 +37,17 @@ func EncodeErrorResponse(w http.ResponseWriter, errorMessage string, status int)
 		http.Error(w, fmt.Sprintf("unable to create error response json: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
+}
+
+func ParseStringToInt(s string) (res int, status int, err error) {
+	status = http.StatusOK
+	res, err = strconv.Atoi(s)
+	if err != nil {
+		err = fmt.Errorf("unable to convert %s to integer: %s", s, err.Error())
+		status = http.StatusBadRequest
+		return
+	}
+	return
 }
 
 func ConvertMapKeys(m map[string]interface{}, converter func(s string) string) (res map[string]interface{}) {

@@ -2,6 +2,10 @@ package dto
 
 import "github.com/FreeJ1nG/backend-template/app/pagination"
 
+var EmptySuccessMessage = map[string]bool{
+	"success": true,
+}
+
 type ErrorData struct {
 	Message string `json:"message"`
 }

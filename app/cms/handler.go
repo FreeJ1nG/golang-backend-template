@@ -3,6 +3,7 @@ package cms
 import (
 	"net/http"
 
+	"github.com/FreeJ1nG/backend-template/app/dto"
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
 	"github.com/FreeJ1nG/backend-template/app/pagination"
 	"github.com/FreeJ1nG/backend-template/util"
@@ -63,4 +64,47 @@ func (h *handler) CreateTableData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.EncodeSuccessResponse(w, res, status, nil)
+}
+
+func (h *handler) UpdateTableData(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	tableName := vars["tableName"]
+	pkString := vars["pk"]
+
+	body := util.ParseRequestBody[map[string]interface{}](w, r)
+	body = util.ConvertMapKeys(body, strcase.ToSnake)
+
+	pk, status, err := util.ParseStringToInt(pkString)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
+
+	res, status, err := h.cmsService.UpdateTableData(tableName, pk, body)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
+
+	util.EncodeSuccessResponse(w, res, status, nil)
+}
+
+func (h *handler) DeleteTableData(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	tableName := vars["tableName"]
+	pkString := vars["pk"]
+
+	pk, status, err := util.ParseStringToInt(pkString)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
+
+	status, err = h.cmsService.DeleteTableData(tableName, pk)
+	if err != nil {
+		util.EncodeErrorResponse(w, err.Error(), status)
+		return
+	}
+
+	util.EncodeSuccessResponse(w, dto.EmptySuccessMessage, status, nil)
 }

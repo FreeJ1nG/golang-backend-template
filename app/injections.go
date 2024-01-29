@@ -18,14 +18,15 @@ func (s *Server) InjectDependencies() {
 
 	// Utils
 	authUtil := auth.NewUtil()
+	cmsUtil := cms.NewUtil()
 
 	// Repositories
 	authRepository := auth.NewRepository(s.db)
-	cmsRepository := cms.NewRepository(s.db, paginator)
+	cmsRepository := cms.NewRepository(s.db, cmsUtil, paginator)
 
 	// Services
 	authService := auth.NewService(authRepository, authUtil)
-	cmsService := cms.NewService(cmsRepository)
+	cmsService := cms.NewService(cmsRepository, cmsUtil)
 
 	// Route Protector Wrapper
 	routeProtector := util.NewRouteProtector(authUtil, authService)
@@ -50,4 +51,6 @@ func (s *Server) InjectDependencies() {
 	cmsRouter.HandleFunc("/{tableName}/info", routeProtector.Wrapper(cmsHandler.GetTableInfo, true)).Methods("GET")
 	cmsRouter.HandleFunc("/{tableName}", routeProtector.Wrapper(cmsHandler.GetTableData, true)).Methods("GET")
 	cmsRouter.HandleFunc("/{tableName}", routeProtector.Wrapper(cmsHandler.CreateTableData, true)).Methods("POST")
+	cmsRouter.HandleFunc("/{tableName}/{pk}", routeProtector.Wrapper(cmsHandler.UpdateTableData, true)).Methods("PATCH")
+	cmsRouter.HandleFunc("/{tableName}/{pk}", routeProtector.Wrapper(cmsHandler.DeleteTableData, true)).Methods("DELETE")
 }

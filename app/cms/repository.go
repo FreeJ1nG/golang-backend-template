@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/FreeJ1nG/backend-template/app/interfaces"
 	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/FreeJ1nG/backend-template/app/pagination"
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -13,17 +14,19 @@ import (
 
 type repository struct {
 	mainDB    *pgxpool.Pool
+	cmsUtil   interfaces.CmsUtil
 	paginator *pagination.Paginator
 }
 
-func NewRepository(mainDB *pgxpool.Pool, paginator *pagination.Paginator) *repository {
+func NewRepository(mainDB *pgxpool.Pool, cmsUtil interfaces.CmsUtil, paginator *pagination.Paginator) *repository {
 	return &repository{
 		mainDB:    mainDB,
+		cmsUtil:   cmsUtil,
 		paginator: paginator,
 	}
 }
 
-func (r *repository) GetTableDataTypes(tableName string) (columns []models.Column, err error) {
+func (r *repository) GetTableDataTypes(tableName string, columnConverter *func(s string) string) (columns []models.Column, err error) {
 	ctx := context.Background()
 
 	err = pgxscan.Select(
@@ -64,6 +67,13 @@ func (r *repository) GetTableDataTypes(tableName string) (columns []models.Colum
 		tableName,
 	)
 
+	if columnConverter != nil {
+		converter := *columnConverter
+		for i, column := range columns {
+			columns[i].ColumnName = converter(column.ColumnName)
+		}
+	}
+
 	return
 }
 
@@ -85,7 +95,7 @@ func (r *repository) GetTableData(tableName string, opts *pagination.Options) (r
 	return
 }
 
-func (r *repository) CreateTableData(tableName string, data map[string]interface{}) (res map[string]interface{}, err error) {
+func (r *repository) CreateTableData(tableName string, data map[string]interface{}, attributes []string) (res map[string]interface{}, err error) {
 	ctx := context.Background()
 
 	var columns []string
@@ -100,14 +110,16 @@ func (r *repository) CreateTableData(tableName string, data map[string]interface
 		i++
 	}
 
+	psqlAttributes := r.cmsUtil.ConvertAttributesToPsqlAttributes(attributes)
 	joinedColumns := strings.Join(columns, ",")
 	joinedPlaceholders := strings.Join(placeholders, ",")
+	joinedPsqlAttributes := strings.Join(psqlAttributes, ",")
 	sql := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s) RETURNING %s;",
 		tableName,
 		joinedColumns,
 		joinedPlaceholders,
-		"id,"+joinedColumns,
+		joinedPsqlAttributes,
 	)
 
 	row := r.mainDB.QueryRow(
@@ -116,24 +128,63 @@ func (r *repository) CreateTableData(tableName string, data map[string]interface
 		values...,
 	)
 
-	scanTargets := make([]interface{}, len(columns)+1)
-	for i := range scanTargets {
-		var result interface{}
-		scanTargets[i] = &result
+	res, err = r.cmsUtil.ConvertRowToMap(row, attributes)
+	return
+}
+
+func (r *repository) UpdateTableDataByPk(tableName string, pk int, data map[string]interface{}, attributes []string) (res map[string]interface{}, err error) {
+	ctx := context.Background()
+
+	var placeholders []string
+	var values []interface{}
+	i := 1
+
+	for key, value := range data {
+		values = append(values, value)
+		placeholders = append(placeholders, fmt.Sprintf("%s = $%d", key, i))
+		i++
 	}
 
-	err = row.Scan(scanTargets...)
-	if err != nil {
-		return
-	}
+	psqlAttributes := r.cmsUtil.ConvertAttributesToPsqlAttributes(attributes)
 
-	fmt.Println(scanTargets...)
+	joinedPlaceholders := strings.Join(placeholders, ",")
+	joinedPsqlAttributes := strings.Join(psqlAttributes, ",")
 
-	res = make(map[string]interface{})
-	res["id"] = scanTargets[0]
-	for i, value := range scanTargets[1:] {
-		res[columns[i]] = value
-	}
+	sql := fmt.Sprintf(
+		`UPDATE %s
+		SET %s
+		WHERE id = %d
+		RETURNING %s;`,
+		tableName,
+		joinedPlaceholders,
+		pk,
+		joinedPsqlAttributes,
+	)
+
+	row := r.mainDB.QueryRow(
+		ctx,
+		sql,
+		values...,
+	)
+
+	res, err = r.cmsUtil.ConvertRowToMap(row, attributes)
+	return
+}
+
+func (r *repository) DeleteTableDataByPk(tableName string, pk int) (err error) {
+	ctx := context.Background()
+
+	sql := fmt.Sprintf(
+		`DELETE FROM %s
+		WHERE id = %d`,
+		tableName,
+		pk,
+	)
+
+	_, err = r.mainDB.Exec(
+		ctx,
+		sql,
+	)
 
 	return
 }
