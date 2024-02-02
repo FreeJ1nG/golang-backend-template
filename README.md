@@ -98,6 +98,25 @@ To undo migration(s), do
 make migrate-down
 ```
 
+To summarize, here are all the available commands
+
+```
+# Create a migration
+make migration [name_of_migration]
+
+# Apply all migrations
+make migrate
+
+# Apply n migrations
+make migrate -- -steps n
+
+# Revert all migrations
+make migrate-down
+
+# Revert n migrations
+make migrate-down -- -steps n
+```
+
 ## Handler, Service, Repository, Util files
 
 - Handler files are essentially controllers, these handlers will handle incoming requests to certain urls (each request object can be accessed through `r *http.Request`)
