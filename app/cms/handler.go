@@ -38,8 +38,10 @@ func (h *handler) GetTableData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	tableName := vars["tableName"]
 
+	relatedTables := r.URL.Query()["relatedTables[]"]
+
 	opts := util.ParseRequestBody[pagination.Options](w, r)
-	res, metadata, status, err := h.cmsService.GetTableData(tableName, &opts)
+	res, metadata, status, err := h.cmsService.GetTableData(tableName, relatedTables, &opts)
 
 	if err != nil {
 		util.EncodeErrorResponse(w, err.Error(), status)

@@ -8,7 +8,9 @@ import (
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
 	"github.com/FreeJ1nG/backend-template/app/models"
 	"github.com/FreeJ1nG/backend-template/app/pagination"
+	"github.com/FreeJ1nG/backend-template/util"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/iancoleman/strcase"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -89,8 +91,55 @@ func (r *repository) GetTableData(tableName string, opts *pagination.Options) (r
 		ctx,
 		r.mainDB,
 		&res,
-		fmt.Sprintf("SELECT * FROM %s OFFSET %d LIMIT %d", tableName, offset, limit),
+		fmt.Sprintf(`
+		SELECT * FROM %s
+		OFFSET %d LIMIT %d;`,
+			tableName,
+			offset,
+			limit,
+		),
 	)
+
+	if err != nil {
+		return
+	}
+
+	for i, data := range res {
+		res[i] = util.ConvertMapKeys(data, strcase.ToLowerCamel)
+	}
+
+	return
+}
+
+func (r *repository) GetRelatedTableData(tableName string, relatedTable string) (res []map[string]interface{}, err error) {
+	ctx := context.Background()
+
+	res = make([]map[string]interface{}, 0)
+	err = pgxscan.Select(
+		ctx,
+		r.mainDB,
+		&res,
+		fmt.Sprintf(`
+		SELECT %s.* FROM %s
+		INNER JOIN %s
+		ON %s.id = %s.%s_id;
+		`,
+			relatedTable,
+			tableName,
+			relatedTable,
+			tableName,
+			relatedTable,
+			tableName,
+		),
+	)
+
+	if err != nil {
+		return
+	}
+
+	for i, data := range res {
+		res[i] = util.ConvertMapKeys(data, strcase.ToLowerCamel)
+	}
 
 	return
 }

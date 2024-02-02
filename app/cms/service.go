@@ -36,14 +36,27 @@ func (s *service) GetTableInfo(tableName string) (res []models.Column, status in
 	return
 }
 
-func (s *service) GetTableData(tableName string, opts *pagination.Options) (res []map[string]interface{}, metadata pagination.Metadata, status int, err error) {
+func (s *service) GetTableData(tableName string, relatedTables []string, opts *pagination.Options) (res map[string]interface{}, metadata pagination.Metadata, status int, err error) {
 	status = http.StatusOK
 
-	res, metadata, err = s.cmsRepo.GetTableData(tableName, opts)
+	res = make(map[string]interface{})
+	var tableData []map[string]interface{}
+	tableData, metadata, err = s.cmsRepo.GetTableData(tableName, opts)
 	if err != nil {
 		status = http.StatusInternalServerError
 		err = fmt.Errorf("unable to get table data: %s", err.Error())
 		return
+	}
+	res["tableData"] = tableData
+
+	for _, relatedTableName := range relatedTables {
+		var relatedTableData []map[string]interface{}
+		relatedTableData, err = s.cmsRepo.GetRelatedTableData(tableName, relatedTableName)
+		if err != nil {
+			err = nil
+			continue
+		}
+		res[relatedTableName] = relatedTableData
 	}
 
 	return

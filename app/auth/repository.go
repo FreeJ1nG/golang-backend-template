@@ -24,7 +24,7 @@ func (r *repository) CreateUser(username string, firstName string, lastName stri
 
 	row := r.mainDB.QueryRow(
 		ctx,
-		`INSERT INTO Account (username, first_name, last_name, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
+		`INSERT INTO account (username, first_name, last_name, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
 		username,
 		firstName,
 		lastName,
@@ -32,7 +32,7 @@ func (r *repository) CreateUser(username string, firstName string, lastName stri
 		role,
 	)
 
-	err = row.Scan(&user.Username, &user.FirstName, &user.LastName, &user.PasswordHash, &user.Role)
+	err = row.Scan(&user.Id, &user.Username, &user.FirstName, &user.LastName, &user.PasswordHash, &user.Role)
 	return
 }
 
@@ -43,7 +43,7 @@ func (r *repository) GetUserByUsername(username string) (user models.User, err e
 		ctx,
 		r.mainDB,
 		&user,
-		`SELECT * FROM Account WHERE username = $1;`,
+		`SELECT * FROM account WHERE username = $1;`,
 		username,
 	)
 
