@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/FreeJ1nG/backend-template/app/interfaces"
@@ -53,7 +52,6 @@ func (rp *routeProtector) Wrapper(f http.HandlerFunc, adminOnly bool) http.Handl
 			EncodeErrorResponse(w, "invalid token, role does not exist in payload", http.StatusBadRequest)
 			return
 		}
-		fmt.Println(parsedRole)
 		if adminOnly && parsedRole != models.Admin {
 			EncodeErrorResponse(w, "unauthorized access to endpoint, must be admin", http.StatusUnauthorized)
 			return

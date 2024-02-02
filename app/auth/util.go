@@ -35,10 +35,12 @@ func (u *utils) GenerateTokenPair(user models.User) (signedJwtToken string, sign
 			},
 		},
 	)
+
 	signedJwtToken, err = token.SignedString([]byte(viper.GetString("JWT_SECRET_KEY")))
 	if err != nil {
 		return
 	}
+
 	refreshExpiryInDays := viper.GetInt("REFRESH_JWT_EXPIRY_IN_DAYS")
 	refreshToken := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
@@ -52,6 +54,7 @@ func (u *utils) GenerateTokenPair(user models.User) (signedJwtToken string, sign
 			},
 		},
 	)
+
 	signedRefreshToken, err = refreshToken.SignedString([]byte(viper.GetString("JWT_SECRET_KEY")))
 	return
 }
@@ -72,12 +75,14 @@ func (u *utils) ExtractJwtToken(r *http.Request) (jwtToken string, err error) {
 		err = fmt.Errorf("invalid authorization header format")
 		return
 	}
+
 	prefix := authSplit[0]
 	tokenString := authSplit[1]
 	if prefix != "Bearer" {
 		err = fmt.Errorf("jwt token not found on authorization header")
 		return
 	}
+
 	jwtToken = tokenString
 	return
 }
@@ -89,9 +94,11 @@ func (u *utils) ToJwtToken(tokenString string) (token *jwt.Token, err error) {
 		}
 		return []byte(viper.GetString("JWT_SECRET_KEY")), nil
 	})
+
 	if err != nil {
 		err = fmt.Errorf("unable to parse token: %s", err.Error())
 		return
 	}
+
 	return
 }
